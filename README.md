@@ -25,8 +25,15 @@ El archivo de preparación de datos utiliza PySpark para procesar y preparar los
     *   Se crea un Notebook en PySpark sobre Athena.
         
     *   Se importan las librerías necesarias, incluyendo tipos de datos de PySpark y pandas compatible con Big Data.
-        
-2.  **Configuración del Archivo de Entrada**:
+  
+    # Líneas 1-14
+       ```bash
+        from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType
+        import pyspark.pandas as pd
+        pd.set_option("display.max_rows", 20)
+        import boto3
+       ```        
+3.  **Configuración del Archivo de Entrada**:
     
     *   Se define el bucket de S3 y la ruta del archivo.
         
@@ -34,7 +41,7 @@ El archivo de preparación de datos utiliza PySpark para procesar y preparar los
         
     *   Se definen las variables categóricas y el campo label.
         
-3.  **Lectura y Procesamiento de Datos**:
+4.  **Lectura y Procesamiento de Datos**:
     
     *   Se lee el archivo CSV desde S3.
         
@@ -42,13 +49,13 @@ El archivo de preparación de datos utiliza PySpark para procesar y preparar los
         
     *   Se crean columnas dummy para variables categóricas.
         
-4.  **Preparación Final de Datos**:
+5.  **Preparación Final de Datos**:
     
     *   Se ordena el DataFrame y se divide en conjuntos de entrenamiento y validación.
         
     *   Se almacenan los DataFrames resultantes en S3.
         
-5.  **Limpieza**:
+6.  **Limpieza**:
     
     *   Se eliminan archivos temporales "\_SUCCESS" de S3.
         
