@@ -41,6 +41,26 @@ El archivo de preparación de datos utiliza PySpark para procesar y preparar los
     *   Se establece el esquema de metadatos para los campos del dataset.
         
     *   Se definen las variables categóricas y el campo label.
+  
+      ```python      
+        bucket = "datasetsbdaarmg2024"
+        rutaDeArchivo = "data/insurance"
+        
+        
+        schema = StructType([
+        StructField("age", DoubleType(), True),
+        StructField("sex", StringType(), True),
+        # ... (otros campos)
+        ])
+        
+        
+        categorias = [
+        "sex",
+        "region",
+        "smoker"
+        ]
+        label = "charges"
+      ```
         
 4.  **Lectura y Procesamiento de Datos**:
     
@@ -49,16 +69,51 @@ El archivo de preparación de datos utiliza PySpark para procesar y preparar los
     *   Se convierte el DataFrame Spark a Pandas para procesamiento.
         
     *   Se crean columnas dummy para variables categóricas.
+  
+     ```python
+        dfRaw = spark.read.format("csv").option("header", "true").option("delimiter", ",").option("encoding", "ISO-8859-1").schema(schema).load(rutaArchivoRaw)
+        
+        
+        dfpRaw = pd.from_pandas(dfRaw.toPandas())
+        
+        
+        dfpDataset = pd.get_dummies(dfpRaw, columns = categorias)
+     ```
         
 5.  **Preparación Final de Datos**:
     
     *   Se ordena el DataFrame y se divide en conjuntos de entrenamiento y validación.
         
     *   Se almacenan los DataFrames resultantes en S3.
+  
+     ```python
+        dfDatasetOrdenado = dfDataset.select(
+        dfDataset["charges"],
+        dfDataset["age"],
+        # ... (otros campos)
+        )
+        
+        
+        dfTrain, dfTest = dfDatasetOrdenado.randomSplit([0.8, 0.2])
+        
+        
+        dfDatasetOrdenado.write.format("csv").option("header", "false").option("delimiter", ",").option("encoding", "ISO-8859-            
+        1").mode("overwrite").save(rutaArchivoDataset)
+     ```
         
 6.  **Limpieza**:
     
     *   Se eliminan archivos temporales "\_SUCCESS" de S3.
+  
+      ```python
+      
+        s3 = boto3.client("s3")
+        s3.delete_object(
+        Bucket = bucket,
+        Key = f"{rutaDeArchivo}_dataset/_SUCCESS"
+        )
+        # ... (repetir para train y test)
+      ```
         
 
 Entrenamiento del Modelo con Amazon SageMaker
