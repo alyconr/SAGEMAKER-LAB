@@ -128,23 +128,79 @@ El utilitario de SageMaker se encarga de configurar y entrenar el modelo de regr
     *   Se inicia una sesión de SageMaker y se obtiene el rol de ejecución.
         
     *   Se configura la lectura de datos de entrenamiento y validación desde S3.
+
+      ```python
+     
+        import sagemaker
+        sesion =  sagemaker.Session()
+        region = sesion.boto_region_name
+        rol =  sagemaker.get_execution_role()
+      ```
         
 2.  **Configuración del Modelo**:
     
     *   Se define el nombre del job de entrenamiento y el algoritmo (linear-learner).
         
     *   Se especifican parámetros como el tipo de predicción, número de servidores, y tipo de instancia.
+
+      ```python
+        dataTrain = TrainingInput(
+        f"s3://{bucket}/data/insurance_train/",
+        content_type = "text/csv",
+        distribution = "FullyReplicated",
+        s3_data_type = "S3Prefix",
+        input_mode = "File",
+        record_wrapping = "None"
+        )
+                
+        nombreDeJobDeEntrenamiento = "entrenamiento-prediccion-numerica"
+        algoritmo = "linear-learner"
+        tipoDePrediccion = "regressor"
+      ```
         
 3.  **Entrenamiento del Modelo**:
     
     *   Se configura el estimador con hiperparámetros específicos.
         
     *   Se inicia el proceso de entrenamiento con los datos de entrenamiento y validación.
+  
+      ```python
+    
+        entrenador = Estimator(
+        image_uri = sagemaker.image_uris.retrieve(algoritmo, region),
+        role = rol,
+        instance_count = numeroDeServidores,
+        instance_type = tipoDeServidor,
+        predictor_type = tipoDePrediccion,
+        sagemaker_session = sesion,
+        base_job_name = nombreDeJobDeEntrenamiento        )
+        
+        
+        entrenador.set_hyperparameters(
+        feature_dim = cantidadDeFeatures,
+        predictor_type = tipoDePrediccion,
+        normalize_data = "true",
+        normalize_label = "true"
+        )
+        
+        
+        entrenador.fit({"train": dataTrain, "validation": dataTest})
+      ```
         
 4.  **Evaluación del Modelo**:
     
     *   Se obtienen y analizan las métricas del modelo entrenado, incluyendo MSE y R².
+
+      ```python
+      
+        sagemakerCliente = boto3.client("sagemaker")
+        nombreDeEntrenamiento = entrenador.latest_training_job.name
+        descripcionDeEntrenamiento = sagemakerCliente.describe_training_job(TrainingJobName = nombreDeEntrenamiento)    
         
+        
+        descripcionDeEntrenamiento["FinalMetricDataList"]
+      ```
+
 
 Configuración y Uso
 -------------------
