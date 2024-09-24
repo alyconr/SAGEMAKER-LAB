@@ -26,8 +26,8 @@ El archivo de preparación de datos utiliza PySpark para procesar y preparar los
         
     *   Se importan las librerías necesarias, incluyendo tipos de datos de PySpark y pandas compatible con Big Data.
   
-  <div style="background-color: rgb(50, 50, 50);">
-       ``python
+  <div style="background-color: rgb(50, 50, 50)">
+       ```python
         from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType
         import pyspark.pandas as pd
         pd.set_option("display.max_rows", 20)
